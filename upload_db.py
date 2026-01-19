@@ -1,6 +1,5 @@
 import mysql.connector
 
-# Local MySQL
 local = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -9,21 +8,19 @@ local = mysql.connector.connect(
 )
 local_cursor = local.cursor(dictionary=True)
 
-# Railway MySQL
 remote = mysql.connector.connect(
     host="shortline.proxy.rlwy.net",
     user="root",
     password="mtocJNYsziRERDOCwMnndSAsvepYzheL",
     database="railway",
     port=20801,
-    connection_timeout=300  # increase timeout
+    connection_timeout=300 
 )
 remote_cursor = remote.cursor()
 
-# Tables to migrate
 tables = ["departements", "formations", "groupes", "professeurs", "lieu_examen", "examens", "etudiant_groupe"]
 
-batch_size = 50  # insert 50 rows at a time
+batch_size = 50 
 
 for table in tables:
     local_cursor.execute(f"SELECT * FROM {table}")
@@ -37,7 +34,7 @@ for table in tables:
     column_names = ", ".join(columns)
     insert_query = f"INSERT INTO {table} ({column_names}) VALUES ({placeholders})"
     
-    # Upload in batches
+    
     for i in range(0, len(rows), batch_size):
         batch = rows[i:i+batch_size]
         remote_cursor.executemany(insert_query, [tuple(r.values()) for r in batch])
