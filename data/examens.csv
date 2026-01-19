@@ -1,0 +1,6 @@
+groupe,module,prof,salle,date_exam,formation,departement
+SE-1,Algorithms,Prof. Smith,Room A,2025-01-10,Software Engineering,Unknown
+SE-1,Databases,Prof. Johnson,Room A,2025-01-11,Software Engineering,Unknown
+SE-2,Algorithms,Prof. Lee,Room A,2025-01-10,Software Engineering,Unknown
+SE-2,Databases,Prof. Smith,Room A,2025-01-11,Software Engineering,Unknown
+CS-1,Operating Systems,Prof. Johnson,Room B,2025-01-10,Computer Science,Unknown
