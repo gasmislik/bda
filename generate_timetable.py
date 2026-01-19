@@ -4,9 +4,7 @@ from collections import defaultdict
 from random import shuffle
 import time
 
-# ===============================
-# Load CSV data
-# ===============================
+
 modules = pd.read_csv("data/modules.csv").to_dict("records")
 groupes = pd.read_csv("data/groupes.csv").to_dict("records")
 formations = pd.read_csv("data/formations.csv").to_dict("records")
@@ -15,16 +13,10 @@ salles = pd.read_csv("data/salles.csv").to_dict("records")
 creneaux = pd.read_csv("data/creneaux.csv").to_dict("records")[:4]
 etudiant_groupes = pd.read_csv("data/etudiant_groupes.csv").to_dict("records")
 
-# ===============================
-# Parameters
-# ===============================
 START_DATE = date(2025, 1, 10)
 NB_DAYS = 20
 DUREE = 90
 
-# ===============================
-# Preprocessing
-# ===============================
 group_size = defaultdict(int)
 for eg in etudiant_groupes:
     group_size[eg["groupe_id"]] += 1
@@ -36,9 +28,6 @@ room_usage = set()
 
 generated_examens = []
 
-# ===============================
-# Helpers
-# ===============================
 def available_profs(exam_date):
     profs_ok = [p for p in profs if prof_day[(p["id"], exam_date)] < 3]
     return sorted(profs_ok, key=lambda p: prof_total[p["id"]])
@@ -54,9 +43,6 @@ def available_rooms(group_id, exam_date, creneau_id):
 
     return result
 
-# ===============================
-# Scheduler
-# ===============================
 def generate_schedule():
     for g in groupes:
         group_modules = [
@@ -110,9 +96,6 @@ def generate_schedule():
                 if placed:
                     break
 
-# ===============================
-# Run
-# ===============================
 if __name__ == "__main__":
     start = time.time()
     generate_schedule()
