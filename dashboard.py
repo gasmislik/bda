@@ -4,12 +4,18 @@ import subprocess
 
 st.set_page_config(page_title="Exam Planning Dashboard", layout="wide")
 
+# ===============================
+# Load data
+# ===============================
 examens = pd.read_csv("planning_examens_dashboard.csv")
 examens["date_exam"] = pd.to_datetime(examens["date_exam"], errors="coerce")
 
- st.sidebar.title("User Role")
+# ===============================
+# Sidebar
+# ===============================
+st.sidebar.title("User Role")
 
- role = st.sidebar.selectbox(
+role = st.sidebar.selectbox(
     "Choose your role",
     [
         "Vice Dean / Dean",
@@ -17,8 +23,11 @@ examens["date_exam"] = pd.to_datetime(examens["date_exam"], errors="coerce")
         "Department Head",
         "Student / Professor"
     ]
- )
+)
 
+# ===============================
+# Vice Dean / Dean
+# ===============================
 if role == "Vice Dean / Dean":
     st.title("Global Overview of Exam Planning")
 
@@ -33,12 +42,12 @@ if role == "Vice Dean / Dean":
             scheduled
             .groupby(["date_exam", "salle"])
             .size()
-            .reset_index(name="count") 
+            .reset_index(name="count")
         )
 
         pivot = room_usage.pivot(
             index="date_exam",
-            columns="salle", 
+            columns="salle",
             values="count"
         ).fillna(0)
 
@@ -46,11 +55,11 @@ if role == "Vice Dean / Dean":
 
         st.subheader("Conflicts by department")
 
-        def detect_conflicts(df): 
+        def detect_conflicts(df):
             return pd.Series({
                 "Group conflicts": df.duplicated(
                     subset=["groupe", "date_exam"]
-                 ).sum(),
+                ).sum(),
                 "Professor conflicts": df.duplicated(
                     subset=["prof", "date_exam"]
                 ).sum()
@@ -60,15 +69,17 @@ if role == "Vice Dean / Dean":
         st.dataframe(conflicts)
 
         col1, col2, col3 = st.columns(3)
-        col1.metric("Total exams", len(scheduled)) 
-        
+        col1.metric("Total exams", len(scheduled))
         col2.metric("Professors involved", scheduled["prof"].nunique())
         col3.metric("Groups involved", scheduled["groupe"].nunique())
 
         if st.button("Validate timetable"):
             st.success("Timetable validated successfully.")
 
-  elif role == "Exam Administrator":
+# ===============================
+# Exam Administrator
+# ===============================
+elif role == "Exam Administrator":
     st.title("Exam Administration")
 
     st.subheader("All exams")
@@ -94,6 +105,9 @@ if role == "Vice Dean / Dean":
         examens.to_csv("exam_planning.csv", index=False)
         st.success("File exported.")
 
+# ===============================
+# Department Head
+# ===============================
 elif role == "Department Head":
     st.title("Department View")
 
@@ -117,6 +131,9 @@ elif role == "Department Head":
     st.metric("Groups", data["groupe"].nunique())
     st.metric("Professors", data["prof"].nunique())
 
+# ===============================
+# Student / Professor
+# ===============================
 else:
     st.title("Personal Exam Schedule")
 
@@ -128,13 +145,13 @@ else:
             examens[examens["prof"] != "Not scheduled"]["prof"].unique()
         )
         st.dataframe(
-             examens[examens["prof"] == prof].sort_values("date_exam")
+            examens[examens["prof"] == prof].sort_values("date_exam")
         )
     else:
-         group = st.selectbox(
+        group = st.selectbox(
             "Choose your group",
             examens["groupe"].unique()
-          )
+        )
         st.dataframe(
             examens[examens["groupe"] == group].sort_values("date_exam")
         )
