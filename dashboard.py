@@ -36,6 +36,7 @@ if role == "Vice Dean / Dean":
     if scheduled.empty:
         st.warning("No exams scheduled.")
     else:
+        # ---------- Room usage ----------
         st.subheader("Room usage per day")
 
         room_usage = (
@@ -53,25 +54,44 @@ if role == "Vice Dean / Dean":
 
         st.bar_chart(pivot)
 
-        st.subheader("Conflicts by department")
+        # ---------- Exams per department ----------
+        st.subheader("Exam distribution by department")
 
-        def detect_conflicts(df):
-            return pd.Series({
-                "Group conflicts": df.duplicated(
-                    subset=["groupe", "date_exam"]
-                ).sum(),
-                "Professor conflicts": df.duplicated(
-                    subset=["prof", "date_exam"]
-                ).sum()
-            })
+        dept_count = (
+            scheduled
+            .groupby("departement")
+            .size()
+            .reset_index(name="Number of exams")
+        )
 
-        conflicts = scheduled.groupby("departement").apply(detect_conflicts)
-        st.dataframe(conflicts)
+        st.bar_chart(
+            dept_count.set_index("departement")
+        )
 
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total exams", len(scheduled))
-        col2.metric("Professors involved", scheduled["prof"].nunique())
-        col3.metric("Groups involved", scheduled["groupe"].nunique())
+        # ---------- Exams per formation ----------
+        st.subheader("Exam load per formation")
+
+        formation_stats = (
+            scheduled
+            .groupby(["departement", "formation"])
+            .size()
+            .reset_index(name="Number of exams")
+        )
+
+        st.dataframe(formation_stats)
+
+        # ---------- Key indicators ----------
+        st.subheader("Key indicators")
+
+        total_exams = len(examens)
+        scheduled_exams = len(scheduled)
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric("Total exams", total_exams)
+        col2.metric("Scheduled exams", scheduled_exams)
+        col3.metric("Completion rate", f"{(scheduled_exams / total_exams) * 100:.1f}%")
+        col4.metric("Rooms used", scheduled["salle"].nunique())
 
         if st.button("Validate timetable"):
             st.success("Timetable validated successfully.")
